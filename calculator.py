@@ -23,7 +23,11 @@ class CalculatorApp:
     # Holds the last number entered into the expression. If the calculate button is hit and the
     # last character in the expression is an arithmetic operator, the calculator will assume the
     # last number entered is to be tacked onto the end of the expression to complete it.
-    __last_number_entered = 0
+    __last_number_entered = '0'
+    # Keeps track of whether or not the last character entered is an arithmetic symbol. Used with
+    # __last_number_entered to determine where the current last number in the expression starts and
+    # stops
+    __character_is_symbol = True
 
 
     def __initialize_root(self) -> None:
@@ -240,9 +244,21 @@ class CalculatorApp:
         self.__expression_label.configure(text=text)
         # Set expression evaluated to False
         self.__expression_evaluated = False
-        # if the button is a number, set the last number entered to that number
+        # if the button is a number, check if the last character entered is a symbol or not set
+        # the last number entered to that number
         if button_name in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
-            self.__last_number_entered = button_name
+            # If the last character entered is not a symbol, append the number to
+            # __last_number_entered
+            if not self.__character_is_symbol:
+                self.__last_number_entered += button_name
+            # Otherwise, the character is now the last number entered in the expression
+            else:
+                self.__last_number_entered = button_name
+            # Set the __character_is_symbol flag to False
+            self.__character_is_symbol = False
+        # Otherwise set the __character_is_symbol flag to True
+        else:
+            self.__character_is_symbol = True
 
 
     def __prep_expression(self, expression: str) -> str:
