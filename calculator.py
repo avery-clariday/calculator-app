@@ -1,4 +1,4 @@
-from tkinter import Tk, Frame, Label, Button
+from tkinter import Tk, Frame, Label, Button, Grid, Event
 
 
 class CalculatorApp:
@@ -35,10 +35,8 @@ class CalculatorApp:
         self.__root = Tk()
         # Set application title
         self.__root.title("Calculator App")
-        # Set the background color
-        self.__root.configure(background='#3c4266')
-        # prevent screen resizing
-        self.__root.resizable(False, False)
+        # Set minimum window size
+        self.__root.minsize(400, 400)
 
 
     def __set_add_character_command(self, button_name: str) -> lambda: function:
@@ -80,7 +78,11 @@ class CalculatorApp:
 
             # Increment row when the column resets to 0
             if column % self.__max_column_size == 0 and button_count != 0:
+                # Configure each row to grow and shrink with the calculator section
+                Grid.rowconfigure(self.__calculator_section, row, weight = 1)
                 row += 1
+            # Configure each column to grow and shrink with the calculator section
+            Grid.columnconfigure(self.__calculator_section, column, weight = 1)
 
 
             # Set lambda commands for buttons
@@ -108,20 +110,27 @@ class CalculatorApp:
 
             # Place button on the grid
             self.__buttons[button_name]['button'].grid(row=self.__buttons[button_name]['row'],
-                                                       column=self.__buttons[button_name]['column'])
+                                                       column=self.__buttons[button_name]['column'],
+                                                       sticky='nsew')
 
 
     def __init__(self) -> None:
         # Initialize GUI
         self.__initialize_root()
-        # self.__initialize_sections()
+        # Configure initial rows and columns to grow and shrink with the window
+        Grid.rowconfigure(self.__root, 0, weight = 1)
+        Grid.rowconfigure(self.__root, 1, weight = 1)
+        Grid.columnconfigure(self.__root, 0, weight = 1)
+        # The label that displays the expression
+        self.__expression_label = Label(self.__calculator_section, height=3, anchor='w', padx=20)
+        self.__expression_label.grid(row = 0, column = 0, columnspan=5, sticky='nsew')
+        self.__expression_label.configure(foreground='black', background='grey')
         # The frame that contains the calculator buttons and labels
         self.__calculator_section = Frame(self.__root, border=2)
-        self.__calculator_section.grid(row=1, column=0)
-        # The label that displays the expression
-        self.__expression_label = Label(self.__calculator_section, height=3)
-        self.__expression_label.grid(row = 0, column = 0, columnspan=5, sticky='ew')
-        self.__expression_label.configure(foreground='black', background='grey')
+        self.__calculator_section.grid(row=1, column=0, sticky='nsew')
+        # bind resize_text method to when the calculator_section's size changes
+        self.__calculator_section.bind('<Configure>', self.__resize_text)
+
         # Initialize Calculator Buttons
         self.__initialize_buttons()
 
@@ -334,6 +343,18 @@ class CalculatorApp:
     def __clear(self) -> None:
         # Clear the text from the expression label
         self.__expression_label.configure(text='')
+
+
+    def __resize_text(self, event: Event) -> None:
+        # Reduce button text size to 1/40 the width of the window
+        text_size = event.width / 40
+        if text_size >= 20:
+            text_size = 20
+        # Set the text size of the expression to be twice the size of the button text
+        self.__expression_label.config(font=("Helvetica", int(text_size * 2)))
+        # Go through each button and set the size of the text
+        for button_name in self.__buttons:
+            self.__buttons[button_name]['button'].config(font=("Helvetica", int(text_size)))
 
 
 if __name__ == '__main__':
