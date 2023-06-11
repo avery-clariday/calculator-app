@@ -2,6 +2,7 @@
 
 This is a simple calculator app that can add, subtract, multiply, and divide built using tkinter.
 Executable file included.
+
 Some features:
  Support for addition, subtraction, multiplication, division and parentheses
 
